@@ -1,0 +1,618 @@
+import { useMemo, useState } from 'react';
+
+const tabOrder = [
+  'Executive Summary',
+  'Rise',
+  'Peak',
+  'Warning Signs',
+  'Turning Points',
+  'Decline',
+  'Key People',
+  'Competitors',
+  'Timeline',
+  'Visual Ideas',
+  'Sources',
+  'Documentary Structure',
+  'YouTube Research Pack'
+];
+
+function buildResearchDraft({ topic, company, question, angle }) {
+  const subject = company?.trim() || topic?.trim() || 'the subject';
+  const focus = topic?.trim() || 'the business story';
+  const researchQuestion = question?.trim() || 'What drove the rise and fall of this subject?';
+  const documentaryAngle = angle?.trim() || 'A cinematic story of ambition, pressure, competition, and collapse.';
+
+  const sourceRows = [
+    {
+      claim: 'Start with official company statements, annual reports, and regulatory filings.',
+      source: 'Official company disclosures and regulatory filings',
+      date: 'Primary source review',
+      url: '',
+      reliabilityNotes: 'Highest reliability for timeline and factual claims.'
+    },
+    {
+      claim: 'Cross-check major business reporting and historical analysis with reputable journalism.',
+      source: 'Major newspapers and business publications',
+      date: 'Publication date required',
+      url: '',
+      reliabilityNotes: 'Useful for context, market reaction, and interpretations.'
+    },
+    {
+      claim: 'Where possible, use academic or historical records to verify broader context.',
+      source: 'Academic work and reputable historical references',
+      date: 'Publication date required',
+      url: '',
+      reliabilityNotes: 'Helpful for long-run context and institutional background.'
+    }
+  ];
+
+  return {
+    topic: focus,
+    company: subject,
+    researchQuestion,
+    documentaryAngle,
+    executiveSummary: `This research package examines ${subject} as a ${focus} story through the lens of ${documentaryAngle.toLowerCase()}. The work should begin with official filings, annual reports, and government or regulatory records, then check those claims against major newspapers, business publications, and relevant historical or academic sources. The key objective is to separate verified facts, reported claims, analysis, and uncertainty before writing any narrative claim.`,
+    rise: `The rise of ${subject} likely involved a combination of market opportunity, strong execution, a credible product or service, and timing. This section should identify the original business model, founding conditions, and strategic advantages that created momentum. It should distinguish between documented milestones and later interpretation, especially where company histories or investor accounts differ.`,
+    peak: `The peak section defines the moment when ${subject} reached its strongest documented position. Evidence for this phase should come from official financial disclosures, valuation records, major coverage, market share data, and credible historical accounts. This section should be careful not to treat a broad narrative claim as fact unless it is supported by a source and date.`,
+    warningSigns: `Warning signs may include margin pressure, regulatory scrutiny, competition, technology disruption, governance concerns, management turnover, customer concentration, debt risk, or strategic missteps. This section should identify the earliest credible signs of strain and explain how they mattered, while noting when evidence is ambiguous or based on reporting rather than direct documentation.`,
+    turningPoints: [
+      'Early strategic breakthrough or category creation',
+      'Major financing, expansion, or public milestone',
+      'Inflection point created by competition, regulation, or technology',
+      'Operational or leadership challenge that altered company strategy',
+      'Crisis event that changed investor confidence or market perception'
+    ],
+    decline: `The decline narrative should be structured around what is actually documented: financial deterioration, market share losses, product disruption, regulatory enforcement, leadership changes, or broader industry declines. Interpretation should be presented separately from facts so the documentary remains grounded and credible.`,
+    keyPeople: [
+      {
+        name: 'Founder or lead entrepreneur',
+        role: 'Documented founding role, strategic vision, or operational leadership.',
+        evidence: 'Company history, interviews, official bios, and historical coverage.'
+      },
+      {
+        name: 'Key executive or operator',
+        role: 'Role in expansion, execution, or strategic choices during growth phases.',
+        evidence: 'Leadership biographies, regulatory filings, annual reports, and press interviews.'
+      },
+      {
+        name: 'Primary competitor or market rival',
+        role: 'Major competitive pressure affecting pricing, share, or strategy.',
+        evidence: 'Industry reporting, filings, and market analysis.'
+      },
+      {
+        name: 'Regulator, financier, or investor',
+        role: 'Influence on capital, compliance, market conditions, or strategic direction.',
+        evidence: 'Regulatory records, investor disclosures, and public reports.'
+      }
+    ],
+    competitors: `The competitive landscape for ${subject} should be mapped by product category, customer base, business model, and geography. This section should compare direct rivals, adjacent businesses, and market entrants, while making clear whether the competitor is a true threat, a secondary force, or a contextual force.`,
+    timeline: [
+      {
+        year: 'Pre-launch / founding',
+        event: 'Establish the founding context and initial business model.',
+        whyItMattered: 'This sets the origin story and the conditions that shaped the company.',
+        source: 'Founding documents, interviews, and historical source review.'
+      },
+      {
+        year: 'Growth phase',
+        event: 'Identify the major expansion event or product adoption milestone.',
+        whyItMattered: 'This explains how the company gained scale and market influence.',
+        source: 'Annual reports, reputable business journalism, and official company materials.'
+      },
+      {
+        year: 'Peak phase',
+        event: 'Document the strongest known operational or market position.',
+        whyItMattered: 'This is the high-water mark that supports the documentary narrative.',
+        source: 'Financial records, public filings, valuation reports, and major coverage.'
+      },
+      {
+        year: 'Challenge phase',
+        event: 'Track the earliest credible warning signs or disruptions.',
+        whyItMattered: 'This establishes how the decline became visible to investors, customers, or regulators.',
+        source: 'Regulatory disclosure, company statements, and coverage.'
+      },
+      {
+        year: 'Decline or aftermath',
+        event: 'Document the turning point and the resulting decline or restructuring.',
+        whyItMattered: 'This is the emotional and strategic turning point for the documentary.',
+        source: 'Official statements, court records, annual reports, and reliable journalism.'
+      }
+    ],
+    keyNumbers: [
+      {
+        metric: 'Revenue, valuation, users, or market share',
+        value: 'Enter only if supported by an official filing, major publication, or trusted data source.',
+        year: 'Year must be stated with the source.',
+        source: 'Official annual report, regulatory filing, or credible publication'
+      },
+      {
+        metric: 'Operating profit / loss',
+        value: 'Use only if reported in a reliable source with a clear date.',
+        year: 'Year must be included and verified.',
+        source: 'Company filings or audited financial statements'
+      },
+      {
+        metric: 'Market share or unit sales',
+        value: 'Use only if directly stated in reporting or official documents.',
+        year: 'Year must be included and cross-checked.',
+        source: 'Industry reports, government data, or company disclosures'
+      }
+    ],
+    sourceTable: sourceRows,
+    documentaryStructure: {
+      coldOpen: 'Open with a visual or emotional moment that frames the scale of ambition, risk, or collapse.',
+      background: 'Set the social, industrial, and economic backdrop behind the company or story.',
+      rise: 'Show how the strategy, market, and execution created momentum.',
+      peak: 'Highlight the strongest documented era and the confidence around it.',
+      warningSigns: 'Introduce cracks in the model or pressure from the outside world.',
+      turningPoint: 'Pinpoint the major event that changed the trajectory.',
+      decline: 'Show what happened and how the failure or unraveling unfolded.',
+      aftermath: 'Explain the remaining legacy, consequences, and lessons.',
+      finalLesson: 'End with a clear moral: what the story says about power, competition, risk, and timing.'
+    },
+    visualIdeas: {
+      coldOpen: [
+        'Aerial shot of a city skyline as the story opens with a rising company narrative',
+        'Office, factory, or warehouse establishing shot with workers moving in rhythm',
+        'Close-up of a product or physical object emblematic of the company',
+        'Abstract financial imagery showing momentum, growth, and scale',
+        'Historical archive footage of offices, streets, or trade activity'
+      ],
+      background: [
+        'Old city streets and local industry at the time the business began',
+        'An early product prototype or storefront in its original context',
+        'Crowds of customers, workers, or investors in a decisive historical moment',
+        'Technology or infrastructure that enabled the rise',
+        'Visual motif of ambition: factory lights, bustling roads, or growing skyline'
+      ],
+      rise: [
+        'Fast-moving montage of product launches, hiring, profit growth, and expansion',
+        'Office scenes showing a team building under pressure',
+        'Market scenes with customers adopting a new product or service',
+        'Billboards, ads, and branding moments showing cultural relevance',
+        'Intercut financial charts rising alongside optimistic footage' 
+      ],
+      peak: [
+        'Wide establishing shot of headquarters, campuses, or flagship sites',
+        'High-angle footage of a crowded market, event, or celebration',
+        'Stock price or valuation graphics presented with a sense of confidence',
+        'Luxury, prestige, or leadership imagery tied to public status',
+        'Crowded industry event or product launch representing dominance' 
+      ],
+      warningSigns: [
+        'Empty offices, layoffs, or muted corporate imagery',
+        'Text overlays showing margin pressure or competition',
+        'Footage of stalled products, market confusion, or unmet expectations',
+        'Abstract visual metaphor for decay, complexity, or disconnection',
+        'Shots of regulation, auditor concerns, or public scrutiny' 
+      ],
+      turningPoint: [
+        'A sharp cut from growth to disruption',
+        'Chronological timeline visual with key dates and events',
+        'Street-level scenes and public reactions to a crisis or strategic shift',
+        'Close-ups of leadership meetings, investor panic, or strategic choices',
+        'A sequence using financial and environmental imagery to show change in mood' 
+      ],
+      decline: [
+        'Slow collapse montage with empty halls, debt warnings, and lost confidence',
+        'Labor or customer fallout represented in atmospheric scenes',
+        'Market and stock imagery showing negative trend lines',
+        'A symbolic visual of a company trying to hold onto an old identity',
+        'Dusty archives or empty buildings marking the end of an era' 
+      ],
+      aftermath: [
+        'Legacy scenes showing what remains after the fall',
+        'Interviews with experts, employees, or witnesses in reflective settings',
+        'Old locations revisited to show contrast between past power and present reality',
+        'Archival footage, reused logos, or abandoned infrastructure',
+        'Still images with narration to frame the broader lesson' 
+      ]
+    },
+    youtubeResearchPack: {
+      possibleTitles: [
+        `${subject}: The Rise and Fall of a Business Empire`,
+        `${subject}: When Growth Became a Trap`,
+        `${subject}: The Price of Winning Too Fast`,
+        `${subject}: How ${subject} Built a Dream and Lost It`,
+        `${subject}: The Story Behind the Collapse` 
+      ],
+      hookIdeas: [
+        'What happens when a company becomes too big to fail and then too fragile to survive?',
+        'This story begins with a brilliant idea and ends with a system that could not adapt.',
+        'The same qualities that created success also laid the groundwork for collapse.',
+        'They built a brand, a market, and a myth — and then the cracks began to show.',
+        'Before the fall, there was a period of unstoppable momentum.'
+      ],
+      thumbnailConcepts: [
+        'Hero shot of company building with dramatic lighting and text overlay',
+        'Close-up of a product or symbol with city skyline behind it',
+        'Split composition showing rise on one side and decline on the other',
+        'A stock chart turning sharply downward behind a recognizable company image',
+        'Historic black-and-white still with modern color accent and text emphasis',
+        'A factory or office scene with ominous shadows and a dramatic title',
+        'Silhouette of a founder or leader against a skyline',
+        'Financial chart intertwined with a product or building image',
+        'Crowd footage with a single subject or symbol in focus',
+        'Minimalist design with one strong object, title, and contrast' 
+      ],
+      importantFacts: [
+        'Establish the company’s founding context and original business purpose.',
+        'Identify the specific event or technology that accelerated growth.',
+        'Document the company’s strongest known market position and the evidence for it.',
+        'Explain the warning signs before the major turning point.',
+        'Separate primary-source facts from later interpretation.',
+        'List the most important people tied to rise, peak, and decline.',
+        'Map the competitive environment and where the company was strongest.',
+        'Note where regulation or policy changed the trajectory.',
+        'Capture the emotional shift from optimism to vulnerability.',
+        'Frame the ultimate lesson of the story in a documentary-friendly way.'
+      ],
+      visualScenes: [
+        'Opening city shot establishing the industry and era',
+        'Founding location or original product scene',
+        'Boardroom or leadership meeting in growth phase',
+        'Factory floor, office, or product launch event',
+        'Financial chart displaying a rise in momentum',
+        'Public market or customer rush scene',
+        'Late-stage operational strain or product challenge',
+        'Regulatory hearing or crisis response scene',
+        'Empty offices or darkened spaces during decline',
+        'Final reflective archival or aftermath montage' 
+      ],
+      unansweredQuestions: [
+        'What specific turning point most altered the company’s trajectory?',
+        'Which competitors had the largest impact on the company’s strategy?',
+        'What was the strongest evidence of decline, and when did it become clear?',
+        'Which legal, policy, or market changes most affected the company?',
+        'What part of the company’s story is still contested or uncertain in historical records?'
+      ]
+    }
+  };
+}
+
+function App() {
+  const [topic, setTopic] = useState('Silicon Valley startups');
+  const [company, setCompany] = useState('The company or person');
+  const [question, setQuestion] = useState('What caused the rise, peak, and collapse?');
+  const [angle, setAngle] = useState('Ambition, timing, competition, and collapse');
+  const [activeTab, setActiveTab] = useState('Executive Summary');
+  const [progress, setProgress] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState(() =>
+    buildResearchDraft({
+      topic: 'Silicon Valley startups',
+      company: 'The company or person',
+      question: 'What caused the rise, peak, and collapse?',
+      angle: 'Ambition, timing, competition, and collapse'
+    })
+  );
+
+  const tabList = useMemo(() => tabOrder, []);
+
+  const handleResearch = () => {
+    setLoading(true);
+    setProgress(15);
+
+    const intervalId = setInterval(() => {
+      setProgress((current) => {
+        if (current >= 100) {
+          clearInterval(intervalId);
+          return 100;
+        }
+        return current + 14;
+      });
+    }, 180);
+
+    setTimeout(() => {
+      const researchReport = buildResearchDraft({ topic, company, question, angle });
+      setReport(researchReport);
+      setActiveTab('Executive Summary');
+      setLoading(false);
+      setProgress(100);
+      clearInterval(intervalId);
+    }, 1600);
+  };
+
+  const handleCopy = async () => {
+    const text = JSON.stringify(report, null, 2);
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Research report copied to clipboard.');
+    } catch (error) {
+      console.error('Copy failed', error);
+    }
+  };
+
+  const handleExport = () => {
+    const text = JSON.stringify(report, null, 2);
+    const blob = new Blob([text], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(report.company || 'research').replace(/\s+/g, '-').toLowerCase()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'Executive Summary':
+        return (
+          <section className="panel">
+            <h3>Executive Summary</h3>
+            <p>{report.executiveSummary}</p>
+          </section>
+        );
+      case 'Rise':
+        return (
+          <section className="panel">
+            <h3>The Rise</h3>
+            <p>{report.rise}</p>
+          </section>
+        );
+      case 'Peak':
+        return (
+          <section className="panel">
+            <h3>The Peak</h3>
+            <p>{report.peak}</p>
+          </section>
+        );
+      case 'Warning Signs':
+        return (
+          <section className="panel">
+            <h3>Warning Signs</h3>
+            <p>{report.warningSigns}</p>
+          </section>
+        );
+      case 'Turning Points':
+        return (
+          <section className="panel">
+            <h3>Turning Points</h3>
+            <ul className="list">
+              {report.turningPoints.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </section>
+        );
+      case 'Decline':
+        return (
+          <section className="panel">
+            <h3>The Decline</h3>
+            <p>{report.decline}</p>
+          </section>
+        );
+      case 'Key People':
+        return (
+          <section className="panel">
+            <h3>Key People</h3>
+            <ul className="cards">
+              {report.keyPeople.map((person) => (
+                <li key={person.name} className="card">
+                  <strong>{person.name}</strong>
+                  <p>{person.role}</p>
+                  <small>{person.evidence}</small>
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      case 'Competitors':
+        return (
+          <section className="panel">
+            <h3>Competitors</h3>
+            <p>{report.competitors}</p>
+          </section>
+        );
+      case 'Timeline':
+        return (
+          <section className="panel">
+            <h3>Timeline</h3>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Year</th>
+                    <th>Event</th>
+                    <th>Why It Mattered</th>
+                    <th>Source</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.timeline.map((item) => (
+                    <tr key={`${item.year}-${item.event}`}>
+                      <td>{item.year}</td>
+                      <td>{item.event}</td>
+                      <td>{item.whyItMattered}</td>
+                      <td>{item.source}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        );
+      case 'Visual Ideas':
+        return (
+          <section className="panel">
+            <h3>Cinematic Visual Ideas</h3>
+            {Object.entries(report.visualIdeas).map(([section, ideas]) => (
+              <div key={section} className="visual-block">
+                <h4>{section}</h4>
+                <ul className="list">
+                  {ideas.map((idea) => (
+                    <li key={idea}>{idea}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        );
+      case 'Sources':
+        return (
+          <section className="panel">
+            <h3>Source Table</h3>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Claim</th>
+                    <th>Source</th>
+                    <th>Date</th>
+                    <th>URL</th>
+                    <th>Reliability Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {report.sourceTable.map((row, index) => (
+                    <tr key={`${row.source}-${index}`}>
+                      <td>{row.claim}</td>
+                      <td>{row.source}</td>
+                      <td>{row.date}</td>
+                      <td>{row.url || 'To be added during verification'}</td>
+                      <td>{row.reliabilityNotes}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        );
+      case 'Documentary Structure':
+        return (
+          <section className="panel">
+            <h3>Documentary Story Structure</h3>
+            <ol className="list numbered">
+              {Object.entries(report.documentaryStructure).map(([label, value]) => (
+                <li key={label}>
+                  <strong>{label.charAt(0).toUpperCase() + label.slice(1)}:</strong> {value}
+                </li>
+              ))}
+            </ol>
+          </section>
+        );
+      case 'YouTube Research Pack':
+        return (
+          <section className="panel">
+            <h3>YouTube Research Pack</h3>
+            <div className="research-pack">
+              <div>
+                <h4>Possible documentary titles</h4>
+                <ul className="list">
+                  {report.youtubeResearchPack.possibleTitles.map((title) => (
+                    <li key={title}>{title}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4>Hook ideas</h4>
+                <ul className="list">
+                  {report.youtubeResearchPack.hookIdeas.map((idea) => (
+                    <li key={idea}>{idea}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4>Important facts</h4>
+                <ul className="list">
+                  {report.youtubeResearchPack.importantFacts.map((fact) => (
+                    <li key={fact}>{fact}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4>Unanswered questions</h4>
+                <ul className="list">
+                  {report.youtubeResearchPack.unansweredQuestions.map((question) => (
+                    <li key={question}>{question}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </section>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="page-shell">
+      <header className="topbar">
+        <div>
+          <p className="eyebrow">SA MONEY MOVES</p>
+          <h1>Research Assistant</h1>
+        </div>
+        <button className="secondary" onClick={handleExport}>Export</button>
+      </header>
+
+      <main className="layout">
+        <aside className="sidebar panel">
+          <div className="form-row">
+            <label>Research topic</label>
+            <input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="e.g. Netflix, airline pricing, luxury retail" />
+          </div>
+
+          <div className="form-row">
+            <label>Company / person / industry</label>
+            <input value={company} onChange={(e) => setCompany(e.target.value)} placeholder="e.g. Uber, Elizabeth Holmes, electric vehicles" />
+          </div>
+
+          <div className="form-row">
+            <label>Research question</label>
+            <textarea value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="What caused the rise, peak, and decline?" />
+          </div>
+
+          <div className="form-row">
+            <label>Documentary angle</label>
+            <textarea value={angle} onChange={(e) => setAngle(e.target.value)} placeholder="e.g. ambition, timing, competition, and collapse" />
+          </div>
+
+          <button className="primary" onClick={handleResearch} disabled={loading}>
+            {loading ? 'Researching...' : 'Research'}
+          </button>
+
+          <div className="progress-block">
+            <div className="progress-labels">
+              <span>Progress</span>
+              <span>{progress}%</span>
+            </div>
+            <div className="progress-bar">
+              <span style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+        </aside>
+
+        <section className="content">
+          <div className="meta-bar panel">
+            <div>
+              <span className="meta-label">Focus</span>
+              <h2>{report.company || 'Research subject'}</h2>
+            </div>
+            <div>
+              <span className="meta-label">Question</span>
+              <p>{report.researchQuestion}</p>
+            </div>
+            <button className="ghost" onClick={handleCopy}>Copy report</button>
+          </div>
+
+          <nav className="tabs" aria-label="Research tabs">
+            {tabList.map((tab) => (
+              <button
+                key={tab}
+                className={activeTab === tab ? 'tab active' : 'tab'}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
+          </nav>
+
+          <div className="content-body">{renderTabContent()}</div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+export default App;
